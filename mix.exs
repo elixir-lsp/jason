@@ -1,4 +1,4 @@
-defmodule Jason.Mixfile do
+defmodule JasonVendored.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/michalmuskala/jason"
@@ -6,7 +6,7 @@ defmodule Jason.Mixfile do
 
   def project() do
     [
-      app: :jason,
+      app: :jason_vendored,
       version: @version,
       elixir: "~> 1.4",
       start_permanent: Mix.env() == :prod,
@@ -66,7 +66,7 @@ defmodule Jason.Mixfile do
   defp docs() do
     [
       main: "readme",
-      name: "Jason",
+      name: "JasonVendored",
       source_ref: "v#{@version}",
       canonical: "http://hexdocs.pm/jason",
       source_url: @source_url,
