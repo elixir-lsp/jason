@@ -1,33 +1,36 @@
-defmodule Jason.DecodeError do
-  @type t :: %__MODULE__{position: integer, data: String.t}
+defmodule JasonVendored.DecodeError do
+  @type t :: %__MODULE__{position: integer, data: String.t()}
 
   defexception [:position, :token, :data]
 
   def message(%{position: position, token: token}) when is_binary(token) do
-    "unexpected sequence at position #{position}: #{inspect token}"
+    "unexpected sequence at position #{position}: #{inspect(token)}"
   end
+
   def message(%{position: position, data: data}) when position == byte_size(data) do
     "unexpected end of input at position #{position}"
   end
+
   def message(%{position: position, data: data}) do
     byte = :binary.at(data, position)
     str = <<byte>>
+
     if String.printable?(str) do
       "unexpected byte at position #{position}: " <>
         "#{inspect byte, base: :hex} (#{inspect str})"
     else
       "unexpected byte at position #{position}: " <>
-        "#{inspect byte, base: :hex}"
+        "#{inspect(byte, base: :hex)}"
     end
   end
 end
 
-defmodule Jason.Decoder do
+defmodule JasonVendored.Decoder do
   @moduledoc false
 
   import Bitwise
 
-  alias Jason.{DecodeError, Codegen}
+  alias JasonVendored.{DecodeError, Codegen}
 
   import Codegen, only: [bytecase: 2, bytecase: 3]
   import Record
@@ -39,9 +42,9 @@ defmodule Jason.Decoder do
   # We use integers instead of atoms to take advantage of the jump table
   # optimization
   @terminate 0
-  @array     1
-  @key       2
-  @object    3
+  @array 1
+  @key 2
+  @object 3
 
   defrecordp :decode, [keys: nil, strings: nil, objects: nil, floats: nil]
 
@@ -56,6 +59,7 @@ defmodule Jason.Decoder do
     catch
       {:position, position} ->
         {:error, %DecodeError{position: position, data: data}}
+
       {:token, token, position} ->
         {:error, %DecodeError{token: token, position: position, data: data}}
     else
@@ -66,14 +70,14 @@ defmodule Jason.Decoder do
 
   defp key_decode_function(%{keys: :atoms}), do: &String.to_atom/1
   defp key_decode_function(%{keys: :atoms!}), do: &String.to_existing_atom/1
-  defp key_decode_function(%{keys: :strings}), do: &(&1)
+  defp key_decode_function(%{keys: :strings}), do: & &1
   defp key_decode_function(%{keys: fun}) when is_function(fun, 1), do: fun
 
   defp string_decode_function(%{strings: :copy}), do: &:binary.copy/1
-  defp string_decode_function(%{strings: :reference}), do: &(&1)
+  defp string_decode_function(%{strings: :reference}), do: & &1
 
   defp object_decode_function(%{objects: :maps}), do: &:maps.from_list/1
-  defp object_decode_function(%{objects: :ordered_objects}), do: &Jason.OrderedObject.new(:lists.reverse(&1))
+  defp object_decode_function(%{objects: :ordered_objects}), do: &JasonVendored.OrderedObject.new(:lists.reverse(&1))
 
   defp float_decode_function(%{floats: :native}) do
     fn string, token, skip ->
@@ -142,6 +146,7 @@ defmodule Jason.Decoder do
           <<_::bits>> ->
             error(original, skip)
         end
+
       _, rest ->
         error(rest, original, skip + 1, stack, decode)
       <<_::bits>> ->
@@ -315,6 +320,7 @@ defmodule Jason.Decoder do
         value(rest, original, skip + 1, [@array, [value | acc] | stack], decode)
       _, _rest ->
         error(original, skip)
+
       <<_::bits>> ->
         empty_error(original, skip)
     end
@@ -345,6 +351,7 @@ defmodule Jason.Decoder do
         key(rest, original, skip, [acc | stack], decode)
       _, _rest ->
         error(original, skip)
+
       <<_::bits>> ->
         empty_error(original, skip)
     end
@@ -366,6 +373,7 @@ defmodule Jason.Decoder do
         string(rest, original, skip + 1, [@key | stack], decode, 0)
       _, _rest ->
         error(original, skip)
+
       <<_::bits>> ->
         empty_error(original, skip)
     end
@@ -379,6 +387,7 @@ defmodule Jason.Decoder do
         value(rest, original, skip + 1, [@object, value | stack], decode)
       _, _rest ->
         error(original, skip)
+
       <<_::bits>> ->
         empty_error(original, skip)
     end
@@ -457,6 +466,7 @@ defmodule Jason.Decoder do
         escapeu(rest, original, skip, stack, decode, acc)
       _, _rest ->
         error(original, skip + 1)
+
       <<_::bits>> ->
         empty_error(original, skip)
     end
@@ -517,12 +527,14 @@ defmodule Jason.Decoder do
         quote location: :keep do
           unquote(int) -> escape_surrogate(unquote_splicing(args))
         end
+
       clause
     end
 
     defp escapeu_first_clause(int, first, last, rest, original, skip, stack, decode, acc)
          when first <= 0x00 do
-      skip = quote do: (unquote(skip) + 6)
+      skip = quote do: unquote(skip) + 6
+
       acc =
         quote bind_quoted: [acc: acc, first: first, last: last] do
           if last <= 0x7F do
@@ -530,7 +542,7 @@ defmodule Jason.Decoder do
             [acc, last]
           else
             # 110xxxx??  10?????
-            byte1 = ((0b110 <<< 5) + (first <<< 2)) + (last >>> 6)
+            byte1 = (0b110 <<< 5) + (first <<< 2) + (last >>> 6)
             byte2 = (0b10 <<< 6) + (last &&& 0b111111)
             [acc, byte1, byte2]
           end
@@ -540,16 +552,18 @@ defmodule Jason.Decoder do
         quote location: :keep do
           unquote(int) -> string(unquote_splicing(args))
         end
+
       clause
     end
 
     defp escapeu_first_clause(int, first, last, rest, original, skip, stack, decode, acc)
          when first <= 0x07 do
-      skip = quote do: (unquote(skip) + 6)
+      skip = quote do: unquote(skip) + 6
+
       acc =
         quote bind_quoted: [acc: acc, first: first, last: last] do
           # 110xxx??  10??????
-          byte1 = ((0b110 <<< 5) + (first <<< 2)) + (last >>> 6)
+          byte1 = (0b110 <<< 5) + (first <<< 2) + (last >>> 6)
           byte2 = (0b10 <<< 6) + (last &&& 0b111111)
           [acc, byte1, byte2]
         end
@@ -558,17 +572,19 @@ defmodule Jason.Decoder do
         quote location: :keep do
           unquote(int) -> string(unquote_splicing(args))
         end
+
       clause
     end
 
     defp escapeu_first_clause(int, first, last, rest, original, skip, stack, decode, acc)
          when first <= 0xFF do
-      skip = quote do: (unquote(skip) + 6)
+      skip = quote do: unquote(skip) + 6
+
       acc =
         quote bind_quoted: [acc: acc, first: first, last: last] do
           # 1110xxxx  10xxxx??  10??????
           byte1 = (0b1110 <<< 4) + (first >>> 4)
-          byte2 = ((0b10 <<< 6) + ((first &&& 0b1111) <<< 2)) + (last >>> 6)
+          byte2 = (0b10 <<< 6) + ((first &&& 0b1111) <<< 2) + (last >>> 6)
           byte3 = (0b10 <<< 6) + (last &&& 0b111111)
           [acc, byte1, byte2, byte3]
         end
@@ -577,11 +593,13 @@ defmodule Jason.Decoder do
         quote location: :keep do
           unquote(int) -> string(unquote_splicing(args))
         end
+
       clause
     end
 
     defmacro escapeu_last(int, original, skip) do
       clauses = escapeu_last_clauses()
+
       quote location: :keep do
         case unquote(int) do
           unquote(clauses ++ token_error_clause(original, skip, 6))
@@ -595,6 +613,7 @@ defmodule Jason.Decoder do
           quote do
             unquote(int) -> unquote(last)
           end
+
         clause
       end
     end
@@ -612,6 +631,7 @@ defmodule Jason.Decoder do
     defp escapeu_surrogate_clauses(last, rest, original, skip, stack, decode, acc, hi) do
       digits1 = ~c'Dd'
       digits2 = Stream.concat([?C..?F, ?c..?f])
+
       for {int, first} <- unicode_escapes(digits1, digits2) do
         escapeu_surrogate_clause(int, first, last, rest, original, skip, stack, decode, acc, hi)
       end
@@ -619,10 +639,11 @@ defmodule Jason.Decoder do
 
     defp escapeu_surrogate_clause(int, first, last, rest, original, skip, stack, decode, acc, hi) do
       skip = quote do: unquote(skip) + 12
+
       acc =
         quote bind_quoted: [acc: acc, first: first, last: last, hi: hi] do
           lo = ((first &&& 0x03) <<< 8) + last
-          [acc | <<(hi + lo)::utf8>>]
+          [acc | <<hi + lo::utf8>>]
         end
       args = [rest, original, skip, stack, decode, acc, 0]
       [clause] =
@@ -630,6 +651,7 @@ defmodule Jason.Decoder do
           unquote(int) ->
             string(unquote_splicing(args))
         end
+
       clause
     end
   end
@@ -665,20 +687,20 @@ defmodule Jason.Decoder do
   end
 
   defp empty_error(_original, skip) do
-    throw {:position, skip}
+    throw({:position, skip})
   end
 
   @compile {:inline, error: 2, token_error: 2, token_error: 3}
   defp error(_original, skip) do
-    throw {:position, skip}
+    throw({:position, skip})
   end
 
   defp token_error(token, position) do
-    throw {:token, token, position}
+    throw({:token, token, position})
   end
 
   defp token_error(token, position, len) do
-    throw {:token, binary_part(token, position, len), position}
+    throw({:token, binary_part(token, position, len), position})
   end
 
   @compile {:inline, continue: 6}
