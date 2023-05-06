@@ -1,4 +1,4 @@
-defmodule JasonVendored.OrderedObject do
+defmodule JasonV.OrderedObject do
   @doc """
   Struct implementing a JSON object retaining order of properties.
 
@@ -74,7 +74,7 @@ defmodule JasonVendored.OrderedObject do
   defp delete_key([], _key), do: []
 end
 
-defimpl Enumerable, for: JasonVendored.OrderedObject do
+defimpl Enumerable, for: JasonV.OrderedObject do
   def count(%{values: []}), do: {:ok, 0}
   def count(_obj), do: {:error, __MODULE__}
 
@@ -87,8 +87,8 @@ defimpl Enumerable, for: JasonVendored.OrderedObject do
   def reduce(%{values: values}, acc, fun), do: Enumerable.List.reduce(values, acc, fun)
 end
 
-defimpl JasonVendored.Encoder, for: JasonVendored.OrderedObject do
+defimpl JasonV.Encoder, for: JasonV.OrderedObject do
   def encode(%{values: values}, opts) do
-    JasonVendored.Encode.keyword(values, opts)
+    JasonV.Encode.keyword(values, opts)
   end
 end

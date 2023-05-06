@@ -1,18 +1,18 @@
-defmodule JasonVendored.Helpers do
+defmodule JasonV.Helpers do
   @moduledoc """
   Provides macro facilities for partial compile-time encoding of JSON.
   """
 
-  alias JasonVendored.{Codegen, Fragment}
+  alias JasonV.{Codegen, Fragment}
 
   @doc ~S"""
   Encodes a JSON map from a compile-time keyword.
 
   Encodes the keys at compile time and strives to create as flat iodata
   structure as possible to achieve maximum efficiency. Does encoding
-  right at the call site, but returns an `%JasonVendored.Fragment{}` struct
+  right at the call site, but returns an `%JasonV.Fragment{}` struct
   that needs to be passed to one of the "main" encoding functions -
-  for example `JasonVendored.encode/2` for final encoding into JSON - this
+  for example `JasonV.encode/2` for final encoding into JSON - this
   makes it completely transparent for most uses.
 
   Only allows keys that do not require escaping in any of the supported
@@ -25,7 +25,7 @@ defmodule JasonVendored.Helpers do
   ## Example
 
       iex> fragment = json_map(foo: 1, bar: 2)
-      iex> JasonVendored.encode!(fragment)
+      iex> JasonV.encode!(fragment)
       "{\"foo\":1,\"bar\":2}"
 
   """
@@ -63,7 +63,7 @@ defmodule JasonVendored.Helpers do
 
       iex> map = %{a: 1, b: 2, c: 3}
       iex> fragment = json_map_take(map, [:c, :b])
-      iex> JasonVendored.encode!(fragment)
+      iex> JasonV.encode!(fragment)
       "{\"c\":3,\"b\":2}"
 
   """

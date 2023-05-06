@@ -1,5 +1,5 @@
 decode_jobs = %{
-  "JasonVendored" => fn {json, _} -> JasonVendored.decode!(json) end,
+  "JasonV" => fn {json, _} -> JasonV.decode!(json) end,
   "Poison" => fn {json, _} -> Poison.decode!(json) end,
   "JSX" => fn {json, _} -> JSX.decode!(json, [:strict]) end,
   "Tiny" => fn {json, _} -> Tiny.decode!(json) end,
@@ -30,7 +30,7 @@ read_data = fn name ->
     |> String.trim("-")
 
   json = File.read!(Path.expand("data/#{file}.json", __DIR__))
-  etf = :erlang.term_to_binary(JasonVendored.decode!(json))
+  etf = :erlang.term_to_binary(JasonV.decode!(json))
 
   {json, etf}
 end

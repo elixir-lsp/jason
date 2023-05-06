@@ -1,7 +1,7 @@
-defmodule JasonVendored.SigilTest do
+defmodule JasonV.SigilTest do
   use ExUnit.Case, async: true
 
-  import JasonVendored.Sigil
+  import JasonV.Sigil
 
-  doctest JasonVendored.Sigil
+  doctest JasonV.Sigil
 end

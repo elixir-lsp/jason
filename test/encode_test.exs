@@ -1,7 +1,7 @@
-defmodule JasonVendored.EncoderTest do
+defmodule JasonV.EncoderTest do
   use ExUnit.Case, async: true
 
-  alias JasonVendored.{EncodeError, Encoder}
+  alias JasonV.{EncodeError, Encoder}
 
   test "atom" do
     assert to_json(nil) == "null"
@@ -125,7 +125,7 @@ defmodule JasonVendored.EncoderTest do
   end
 
   test "OrderedObject" do
-    import JasonVendored.OrderedObject, only: [new: 1]
+    import JasonV.OrderedObject, only: [new: 1]
 
     assert to_json(new([])) == "{}"
     assert to_json(new([{"foo", "bar"}]))  == ~s({"foo":"bar"})
@@ -142,8 +142,8 @@ defmodule JasonVendored.EncoderTest do
   end
 
   test "Fragment" do
-    pre_encoded_json = Jason.encode!(%{hello: "world", test: 123})
-    assert to_json(%{foo: Jason.Fragment.new(pre_encoded_json)}) == ~s({"foo":#{pre_encoded_json}})
+    pre_encoded_json = JasonV.encode!(%{hello: "world", test: 123})
+    assert to_json(%{foo: JasonV.Fragment.new(pre_encoded_json)}) == ~s({"foo":#{pre_encoded_json}})
   end
 
   defmodule Derived do
@@ -172,8 +172,8 @@ defmodule JasonVendored.EncoderTest do
 
   test "@derive" do
     derived = %Derived{name: "derived"}
-    assert Encoder.impl_for!(derived) == Encoder.JasonVendored.EncoderTest.Derived
-    assert JasonVendored.decode!(to_json(derived)) == %{"name" => "derived"}
+    assert Encoder.impl_for!(derived) == Encoder.JasonV.EncoderTest.Derived
+    assert JasonV.decode!(to_json(derived)) == %{"name" => "derived"}
 
     non_derived = %NonDerived{name: "non-derived"}
 
@@ -197,7 +197,7 @@ defmodule JasonVendored.EncoderTest do
     assert_raise ArgumentError, message, fn ->
       Code.eval_string("""
       defmodule InvalidExceptField do
-        @derive {JasonVendored.Encoder, except: [:invalid]}
+        @derive {JasonV.Encoder, except: [:invalid]}
         defstruct name: ""
       end
       """)
@@ -210,7 +210,7 @@ defmodule JasonVendored.EncoderTest do
     assert_raise ArgumentError, message, fn ->
       Code.eval_string("""
       defmodule InvalidOnlyField do
-        @derive {JasonVendored.Encoder, only: [:invalid]}
+        @derive {JasonV.Encoder, only: [:invalid]}
         defstruct name: ""
       end
       """)
@@ -221,12 +221,12 @@ defmodule JasonVendored.EncoderTest do
     defstruct [:baz, :foo, :quux]
   end
 
-  defimpl JasonVendored.Encoder, for: [KeywordTester] do
+  defimpl JasonV.Encoder, for: [KeywordTester] do
     def encode(struct, opts) do
       struct
       |> Map.from_struct
       |> Enum.sort_by(&elem(&1, 0))
-      |> JasonVendored.Encode.keyword(opts)
+      |> JasonV.Encode.keyword(opts)
     end
   end
 
@@ -250,20 +250,20 @@ defmodule JasonVendored.EncoderTest do
   end
 
   test "encode should not raise on Protocol.UndefinedError" do
-    assert {:error, %Protocol.UndefinedError{}} = JasonVendored.encode(self())
+    assert {:error, %Protocol.UndefinedError{}} = JasonV.encode(self())
   end
 
   test "pretty: true" do
-    object = Jason.OrderedObject.new(a: 3.14159, b: 1)
+    object = JasonV.OrderedObject.new(a: 3.14159, b: 1)
     assert to_json(object, pretty: true) == ~s|{\n  "a": 3.14159,\n  "b": 1\n}|
   end
 
   test "pretty: false" do
-    object = Jason.OrderedObject.new(a: 3.14159, b: 1)
+    object = JasonV.OrderedObject.new(a: 3.14159, b: 1)
     assert to_json(object, pretty: false) == ~s|{"a":3.14159,"b":1}|
   end
 
   defp to_json(value, opts \\ []) do
-    JasonVendored.encode!(value, opts)
+    JasonV.encode!(value, opts)
   end
 end

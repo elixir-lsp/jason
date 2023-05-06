@@ -1,5 +1,5 @@
 if Code.ensure_loaded?(ExUnitProperties) do
-  defmodule JasonVendored.PropertyTest do
+  defmodule JasonV.PropertyTest do
     use ExUnit.Case, async: true
     use ExUnitProperties
 
@@ -70,8 +70,8 @@ if Code.ensure_loaded?(ExUnitProperties) do
       end
     end
 
-    defp decode(data, opts \\ []), do: JasonVendored.decode!(data, opts)
-    defp encode(data, opts \\ []), do: JasonVendored.encode!(data, opts)
+    defp decode(data, opts \\ []), do: JasonV.decode!(data, opts)
+    defp encode(data, opts \\ []), do: JasonV.encode!(data, opts)
 
     defp json(keys) do
       simple = one_of([integer(), float(), string(:printable), boolean(), nil])
