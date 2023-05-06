@@ -1,4 +1,4 @@
-defmodule JasonVendored.DecodeError do
+defmodule JasonV.DecodeError do
   @type t :: %__MODULE__{position: integer, data: String.t()}
 
   defexception [:position, :token, :data]
@@ -25,12 +25,12 @@ defmodule JasonVendored.DecodeError do
   end
 end
 
-defmodule JasonVendored.Decoder do
+defmodule JasonV.Decoder do
   @moduledoc false
 
   import Bitwise
 
-  alias JasonVendored.{DecodeError, Codegen}
+  alias JasonV.{DecodeError, Codegen}
 
   import Codegen, only: [bytecase: 2, bytecase: 3]
   import Record
@@ -77,7 +77,7 @@ defmodule JasonVendored.Decoder do
   defp string_decode_function(%{strings: :reference}), do: & &1
 
   defp object_decode_function(%{objects: :maps}), do: &:maps.from_list/1
-  defp object_decode_function(%{objects: :ordered_objects}), do: &JasonVendored.OrderedObject.new(:lists.reverse(&1))
+  defp object_decode_function(%{objects: :ordered_objects}), do: &JasonV.OrderedObject.new(:lists.reverse(&1))
 
   defp float_decode_function(%{floats: :native}) do
     fn string, token, skip ->

@@ -1,4 +1,4 @@
-defmodule JasonVendoredBench.MixProject do
+defmodule JasonVBench.MixProject do
   use Mix.Project
 
   def project do

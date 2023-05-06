@@ -1,7 +1,7 @@
-defmodule JasonVendored.HelpersTest do
+defmodule JasonV.HelpersTest do
   use ExUnit.Case, async: true
 
-  alias JasonVendored.{Helpers, Fragment, EncodeError}
+  alias JasonV.{Helpers, Fragment, EncodeError}
   import Helpers
 
   doctest Helpers
@@ -15,7 +15,7 @@ defmodule JasonVendored.HelpersTest do
 
     test "produces same output as regular encoding" do
       assert %Fragment{} = helper = json_map(bar: 2, baz: 3, foo: 1)
-      assert JasonVendored.encode!(helper) == JasonVendored.encode!(%{bar: 2, baz: 3, foo: 1})
+      assert JasonV.encode!(helper) == JasonV.encode!(%{bar: 2, baz: 3, foo: 1})
     end
 
     test "rejects keys with invalid characters" do
@@ -38,7 +38,7 @@ defmodule JasonVendored.HelpersTest do
       map = %{escape: 1}
       assert %Fragment{} = helper = json_map_take(map, [:escape])
       assert Keyword.keys(binding()) == [:helper, :map]
-      assert JasonVendored.encode!(helper) == JasonVendored.encode!(map)
+      assert JasonV.encode!(helper) == JasonV.encode!(map)
     end
 
     test "fails gracefully" do

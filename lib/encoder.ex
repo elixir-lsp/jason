@@ -1,4 +1,4 @@
-defprotocol JasonVendored.Encoder do
+defprotocol JasonV.Encoder do
   @moduledoc """
   Protocol controlling how a value is encoded to JSON.
 
@@ -21,46 +21,46 @@ defprotocol JasonVendored.Encoder do
         defstruct [:foo, :bar, :baz]
       end
 
-  If we were to call `@derive JasonVendored.Encoder` just before `defstruct`,
+  If we were to call `@derive JasonV.Encoder` just before `defstruct`,
   an implementation similar to the following implementation would be generated:
 
-      defimpl JasonVendored.Encoder, for: Test do
+      defimpl JasonV.Encoder, for: Test do
         def encode(value, opts) do
-          JasonVendored.Encode.map(Map.take(value, [:foo, :bar, :baz]), opts)
+          JasonV.Encode.map(Map.take(value, [:foo, :bar, :baz]), opts)
         end
       end
 
-  If we called `@derive {JasonVendored.Encoder, only: [:foo]}`, an implementation
+  If we called `@derive {JasonV.Encoder, only: [:foo]}`, an implementation
   similar to the following implementation would be generated:
 
-      defimpl JasonVendored.Encoder, for: Test do
+      defimpl JasonV.Encoder, for: Test do
         def encode(value, opts) do
-          JasonVendored.Encode.map(Map.take(value, [:foo]), opts)
+          JasonV.Encode.map(Map.take(value, [:foo]), opts)
         end
       end
 
-  If we called `@derive {JasonVendored.Encoder, except: [:foo]}`, an implementation
+  If we called `@derive {JasonV.Encoder, except: [:foo]}`, an implementation
   similar to the following implementation would be generated:
 
-      defimpl JasonVendored.Encoder, for: Test do
+      defimpl JasonV.Encoder, for: Test do
         def encode(value, opts) do
-          JasonVendored.Encode.map(Map.take(value, [:bar, :baz]), opts)
+          JasonV.Encode.map(Map.take(value, [:bar, :baz]), opts)
         end
       end
 
   The actually generated implementations are more efficient computing some data
-  during compilation similar to the macros from the `JasonVendored.Helpers` module.
+  during compilation similar to the macros from the `JasonV.Helpers` module.
 
   ## Explicit implementation
 
   If you wish to implement the protocol fully yourself, it is advised to
-  use functions from the `JasonVendored.Encode` module to do the actual iodata
+  use functions from the `JasonV.Encode` module to do the actual iodata
   generation - they are highly optimized and verified to always produce
   valid JSON.
   """
 
   @type t :: term
-  @type opts :: JasonVendored.Encode.opts()
+  @type opts :: JasonV.Encode.opts()
 
   @fallback_to_any true
 
@@ -68,24 +68,24 @@ defprotocol JasonVendored.Encoder do
   Encodes `value` to JSON.
 
   The argument `opts` is opaque - it can be passed to various functions in
-  `JasonVendored.Encode` (or to the protocol function itself) for encoding values to JSON.
+  `JasonV.Encode` (or to the protocol function itself) for encoding values to JSON.
   """
   @spec encode(t, opts) :: iodata
   def encode(value, opts)
 end
 
-defimpl JasonVendored.Encoder, for: Any do
+defimpl JasonV.Encoder, for: Any do
   defmacro __deriving__(module, struct, opts) do
     fields = fields_to_encode(struct, opts)
     kv = Enum.map(fields, &{&1, generated_var(&1, __MODULE__)})
     escape = quote(do: escape)
     encode_map = quote(do: encode_map)
     encode_args = [escape, encode_map]
-    kv_iodata = JasonVendored.Codegen.build_kv_iodata(kv, encode_args)
+    kv_iodata = JasonV.Codegen.build_kv_iodata(kv, encode_args)
 
     quote do
-      defimpl JasonVendored.Encoder, for: unquote(module) do
-        require JasonVendored.Helpers
+      defimpl JasonV.Encoder, for: unquote(module) do
+        require JasonV.Helpers
 
         def encode(%{unquote_splicing(kv)}, {unquote(escape), unquote(encode_map)}) do
           unquote(kv_iodata)
@@ -104,26 +104,26 @@ defimpl JasonVendored.Encoder, for: Any do
       protocol: @protocol,
       value: struct,
       description: """
-      JasonVendored.Encoder protocol must always be explicitly implemented.
+      JasonV.Encoder protocol must always be explicitly implemented.
 
       If you own the struct, you can derive the implementation specifying \
       which fields should be encoded to JSON:
 
-          @derive {JasonVendored.Encoder, only: [....]}
+          @derive {JasonV.Encoder, only: [....]}
           defstruct ...
 
       It is also possible to encode all fields, although this should be \
       used carefully to avoid accidentally leaking private information \
       when new fields are added:
 
-          @derive JasonVendored.Encoder
+          @derive JasonV.Encoder
           defstruct ...
 
       Finally, if you don't own the struct you want to encode to JSON, \
       you may use Protocol.derive/3 placed outside of any module:
 
-          Protocol.derive(JasonVendored.Encoder, NameOfTheStruct, only: [...])
-          Protocol.derive(JasonVendored.Encoder, NameOfTheStruct)
+          Protocol.derive(JasonV.Encoder, NameOfTheStruct, only: [...])
+          Protocol.derive(JasonV.Encoder, NameOfTheStruct)
       """
   end
 
@@ -131,7 +131,7 @@ defimpl JasonVendored.Encoder, for: Any do
     raise Protocol.UndefinedError,
       protocol: @protocol,
       value: value,
-      description: "JasonVendored.Encoder protocol must always be explicitly implemented"
+      description: "JasonV.Encoder protocol must always be explicitly implemented"
   end
 
   defp fields_to_encode(struct, opts) do
@@ -169,42 +169,42 @@ defimpl JasonVendored.Encoder, for: Any do
 end
 
 # The following implementations are formality - they are already covered
-# by the main encoding mechanism in JasonVendored.Encode, but exist mostly for
+# by the main encoding mechanism in JasonV.Encode, but exist mostly for
 # documentation purposes and if anybody had the idea to call the protocol directly.
 
-defimpl JasonVendored.Encoder, for: Atom do
+defimpl JasonV.Encoder, for: Atom do
   def encode(atom, opts) do
-    JasonVendored.Encode.atom(atom, opts)
+    JasonV.Encode.atom(atom, opts)
   end
 end
 
-defimpl JasonVendored.Encoder, for: Integer do
+defimpl JasonV.Encoder, for: Integer do
   def encode(integer, _opts) do
-    JasonVendored.Encode.integer(integer)
+    JasonV.Encode.integer(integer)
   end
 end
 
-defimpl JasonVendored.Encoder, for: Float do
+defimpl JasonV.Encoder, for: Float do
   def encode(float, _opts) do
-    JasonVendored.Encode.float(float)
+    JasonV.Encode.float(float)
   end
 end
 
-defimpl JasonVendored.Encoder, for: List do
+defimpl JasonV.Encoder, for: List do
   def encode(list, opts) do
-    JasonVendored.Encode.list(list, opts)
+    JasonV.Encode.list(list, opts)
   end
 end
 
-defimpl JasonVendored.Encoder, for: Map do
+defimpl JasonV.Encoder, for: Map do
   def encode(map, opts) do
-    JasonVendored.Encode.map(map, opts)
+    JasonV.Encode.map(map, opts)
   end
 end
 
-defimpl JasonVendored.Encoder, for: BitString do
+defimpl JasonV.Encoder, for: BitString do
   def encode(binary, opts) when is_binary(binary) do
-    JasonVendored.Encode.string(binary, opts)
+    JasonV.Encode.string(binary, opts)
   end
 
   def encode(bitstring, _opts) do
@@ -215,13 +215,13 @@ defimpl JasonVendored.Encoder, for: BitString do
   end
 end
 
-defimpl JasonVendored.Encoder, for: [Date, Time, NaiveDateTime, DateTime] do
+defimpl JasonV.Encoder, for: [Date, Time, NaiveDateTime, DateTime] do
   def encode(value, _opts) do
     [?", @for.to_iso8601(value), ?"]
   end
 end
 
-defimpl JasonVendored.Encoder, for: Decimal do
+defimpl JasonV.Encoder, for: Decimal do
   def encode(value, _opts) do
     # silence the xref warning
     decimal = Decimal
@@ -229,7 +229,7 @@ defimpl JasonVendored.Encoder, for: Decimal do
   end
 end
 
-defimpl JasonVendored.Encoder, for: JasonVendored.Fragment do
+defimpl JasonV.Encoder, for: JasonV.Fragment do
   def encode(%{encode: encode}, opts) do
     encode.(opts)
   end

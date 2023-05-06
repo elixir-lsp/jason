@@ -1,7 +1,7 @@
-defmodule JasonVendored.Codegen do
+defmodule JasonV.Codegen do
   @moduledoc false
 
-  alias JasonVendored.{Encode, EncodeError}
+  alias JasonV.{Encode, EncodeError}
 
   def jump_table(ranges, default) do
     ranges

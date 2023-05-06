@@ -1,5 +1,5 @@
-Unknown function 'Elixir.JasonVendored.Encoder.Function':'__impl__'/1
-Unknown function 'Elixir.JasonVendored.Encoder.PID':'__impl__'/1
-Unknown function 'Elixir.JasonVendored.Encoder.Port':'__impl__'/1
-Unknown function 'Elixir.JasonVendored.Encoder.Reference':'__impl__'/1
-Unknown function 'Elixir.JasonVendored.Encoder.Tuple':'__impl__'/1
+Unknown function 'Elixir.JasonV.Encoder.Function':'__impl__'/1
+Unknown function 'Elixir.JasonV.Encoder.PID':'__impl__'/1
+Unknown function 'Elixir.JasonV.Encoder.Port':'__impl__'/1
+Unknown function 'Elixir.JasonV.Encoder.Reference':'__impl__'/1
+Unknown function 'Elixir.JasonV.Encoder.Tuple':'__impl__'/1

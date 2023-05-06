@@ -1,5 +1,5 @@
-defmodule JasonVendoredTest do
+defmodule JasonVTest do
   use ExUnit.Case, async: true
 
-  doctest JasonVendored
+  doctest JasonV
 end

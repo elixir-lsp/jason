@@ -1,9 +1,9 @@
-defmodule JasonVendored do
+defmodule JasonV do
   @moduledoc """
   A blazing fast JSON parser and generator in pure Elixir.
   """
 
-  alias JasonVendored.{Encode, Decoder, DecodeError, EncodeError, Formatter}
+  alias JasonV.{Encode, Decoder, DecodeError, EncodeError, Formatter}
 
   @type escape :: :json | :unicode_safe | :html_safe | :javascript_safe
   @type maps :: :naive | :strict
@@ -48,7 +48,7 @@ defmodule JasonVendored do
     * `:objects` - controls how objects are decoded. Possible values are:
 
       * `:maps` (default) - objects are decoded as maps
-      * `:ordered_objects` - objects are decoded as `JasonVendored.OrderedObject` structs
+      * `:ordered_objects` - objects are decoded as `JasonV.OrderedObject` structs
 
   ## Decoding keys to atoms
 
@@ -58,11 +58,11 @@ defmodule JasonVendored do
 
   ## Examples
 
-      iex> JasonVendored.decode("{}")
+      iex> JasonV.decode("{}")
       {:ok, %{}}
 
-      iex> JasonVendored.decode("invalid")
-      {:error, %JasonVendored.DecodeError{data: "invalid", position: 0, token: nil}}
+      iex> JasonV.decode("invalid")
+      {:error, %JasonV.DecodeError{data: "invalid", position: 0, token: nil}}
   """
   @spec decode(iodata, [decode_opt]) :: {:ok, term} | {:error, DecodeError.t()}
   def decode(input, opts \\ []) do
@@ -78,11 +78,11 @@ defmodule JasonVendored do
 
   ## Examples
 
-      iex> JasonVendored.decode!("{}")
+      iex> JasonV.decode!("{}")
       %{}
 
-      iex> JasonVendored.decode!("invalid")
-      ** (JasonVendored.DecodeError) unexpected byte at position 0: 0x69 ("i")
+      iex> JasonV.decode!("invalid")
+      ** (JasonV.DecodeError) unexpected byte at position 0: 0x69 ("i")
 
   """
   @spec decode!(iodata, [decode_opt]) :: term | no_return
@@ -96,7 +96,7 @@ defmodule JasonVendored do
   @doc """
   Generates JSON corresponding to `input`.
 
-  The generation is controlled by the `JasonVendored.Encoder` protocol,
+  The generation is controlled by the `JasonV.Encoder` protocol,
   please refer to the module to read more on how to define the protocol
   for custom data types.
 
@@ -122,15 +122,15 @@ defmodule JasonVendored do
     * `:pretty` - controls pretty printing of the output. Possible values are:
 
       * `true` to pretty print with default configuration
-      * a keyword of options as specified by `JasonVendored.Formatter.pretty_print/2`.
+      * a keyword of options as specified by `JasonV.Formatter.pretty_print/2`.
 
   ## Examples
 
-      iex> JasonVendored.encode(%{a: 1})
+      iex> JasonV.encode(%{a: 1})
       {:ok, ~S|{"a":1}|}
 
-      iex> JasonVendored.encode("\\xFF")
-      {:error, %JasonVendored.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
+      iex> JasonV.encode("\\xFF")
+      {:error, %JasonV.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
 
   """
   @spec encode(term, [encode_opt]) ::
@@ -150,11 +150,11 @@ defmodule JasonVendored do
 
   ## Examples
 
-      iex> JasonVendored.encode!(%{a: 1})
+      iex> JasonV.encode!(%{a: 1})
       ~S|{"a":1}|
 
-      iex> JasonVendored.encode!("\\xFF")
-      ** (JasonVendored.EncodeError) invalid byte 0xFF in <<255>>
+      iex> JasonV.encode!("\\xFF")
+      ** (JasonV.EncodeError) invalid byte 0xFF in <<255>>
 
   """
   @spec encode!(term, [encode_opt]) :: String.t() | no_return
@@ -176,12 +176,12 @@ defmodule JasonVendored do
 
   ## Examples
 
-      iex> {:ok, iodata} = JasonVendored.encode_to_iodata(%{a: 1})
+      iex> {:ok, iodata} = JasonV.encode_to_iodata(%{a: 1})
       iex> IO.iodata_to_binary(iodata)
       ~S|{"a":1}|
 
-      iex> JasonVendored.encode_to_iodata("\\xFF")
-      {:error, %JasonVendored.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
+      iex> JasonV.encode_to_iodata("\\xFF")
+      {:error, %JasonV.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
 
   """
   @spec encode_to_iodata(term, [encode_opt]) ::
@@ -198,12 +198,12 @@ defmodule JasonVendored do
 
   ## Examples
 
-      iex> iodata = JasonVendored.encode_to_iodata!(%{a: 1})
+      iex> iodata = JasonV.encode_to_iodata!(%{a: 1})
       iex> IO.iodata_to_binary(iodata)
       ~S|{"a":1}|
 
-      iex> JasonVendored.encode_to_iodata!("\\xFF")
-      ** (JasonVendored.EncodeError) invalid byte 0xFF in <<255>>
+      iex> JasonV.encode_to_iodata!("\\xFF")
+      ** (JasonV.EncodeError) invalid byte 0xFF in <<255>>
 
   """
   @spec encode_to_iodata!(term, [encode_opt]) :: iodata | no_return

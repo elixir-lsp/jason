@@ -1,4 +1,4 @@
-defmodule JasonVendored.Formatter do
+defmodule JasonV.Formatter do
   @moduledoc ~S"""
   Pretty-printing and minimizing functions for JSON-encoded data.
 
@@ -36,7 +36,7 @@ defmodule JasonVendored.Formatter do
 
   ## Examples
 
-      iex> JasonVendored.Formatter.pretty_print(~s|{"a":{"b": [1, 2]}}|)
+      iex> JasonV.Formatter.pretty_print(~s|{"a":{"b": [1, 2]}}|)
       ~s|{
         "a": {
           "b": [
@@ -88,7 +88,7 @@ defmodule JasonVendored.Formatter do
 
   ## Examples
 
-      iex> JasonVendored.Formatter.minimize(~s|{ "a" : "b" , "c": \n\n 2}|)
+      iex> JasonV.Formatter.minimize(~s|{ "a" : "b" , "c": \n\n 2}|)
       ~s|{"a":"b","c":2}|
 
   """

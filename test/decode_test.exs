@@ -1,7 +1,7 @@
-defmodule JasonVendored.DecodeTest do
+defmodule JasonV.DecodeTest do
   use ExUnit.Case, async: true
 
-  alias JasonVendored.DecodeError
+  alias JasonV.DecodeError
 
   test "numbers" do
     assert_fail_with "-", ~S|unexpected end of input at position 1|
@@ -115,7 +115,7 @@ defmodule JasonVendored.DecodeTest do
   end
 
   test "decoding objects preserving order" do
-    import JasonVendored.OrderedObject, only: [new: 1]
+    import JasonV.OrderedObject, only: [new: 1]
 
     assert parse!("{}", objects: :ordered_objects) == new([])
     assert parse!(~s({"foo": "bar"}), objects: :ordered_objects) == new([{"foo", "bar"}])
@@ -174,7 +174,7 @@ defmodule JasonVendored.DecodeTest do
   end
 
   defp parse!(json, opts \\ []) do
-    JasonVendored.decode!(json, opts)
+    JasonV.decode!(json, opts)
   end
 
   defp assert_fail_with(string, error) do
